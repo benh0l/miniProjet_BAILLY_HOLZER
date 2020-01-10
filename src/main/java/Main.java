@@ -2,6 +2,9 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import scala.Tuple2;
 
 import java.io.File;
@@ -18,7 +21,10 @@ public class Main {
     public static void main(String[] args) {
         SparkConf conf = new SparkConf().setAppName("Workshop").setMaster("local");
         JavaSparkContext sc = new JavaSparkContext(conf);
-
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("SparkSessionExample")
+                .getOrCreate();
 
         Scanner scan = null;
         try {
@@ -43,8 +49,11 @@ public class Main {
             //Compter les occurences des mots
         JavaPairRDD<String, Integer> counts = lines
                 //supprime les espaces du compte de mots
-                .flatMap(s -> Arrays.asList(s.toLowerCase().replaceAll("[^A-Za-z\\-àâäéèêëïîôöùûüÿçæœ]+"," ").trim().split("\\s+")))
+                .flatMap(s -> Arrays.asList(s.toLowerCase().replaceAll("[^A-Za-z\\-àâäéèêëïîôöùûüÿçæœ]+"," ")
+                        .trim()
+                        .split("\\s+")).iterator())
                 .filter(s -> !(s.isEmpty()))
+                //.flatMap(s -> s.iterator())
                 .mapToPair(word -> new Tuple2<>(word, 1))
                 .reduceByKey((a, b) -> a + b);
             //Tri des mots par ordre décroissant des apparitions
@@ -73,6 +82,18 @@ public class Main {
         List countsTop10 = countsWithoutStopWords.take(10);
         System.out.println("Top 10 des mots :");
         countsTop10.forEach(data -> {System.out.println(data);});
+
+        //QUESTION 5
+        String[] files;
+        File f = new File("EVC-TXT/cf");
+        files = f.list();
+        Dataset<Row>[] datasets = new Dataset[files.length];
+        int i = 0;
+        for(String file: files){
+            datasets[i] = spark.read().text(file);
+            i++;
+        }
+
     }
 
 
