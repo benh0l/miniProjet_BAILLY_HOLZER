@@ -83,14 +83,18 @@ public class Main {
         System.out.println("Top 10 des mots :");
         countsTop10.forEach(data -> {System.out.println(data);});
 
-        //QUESTION 5
+        //PARTIE 2
         String[] files;
         File f = new File("EVC-TXT/cf");
         files = f.list();
         Dataset<Row>[] datasets = new Dataset[files.length];
         int i = 0;
         for(String file: files){
+            //QUESTION 5
             datasets[i] = spark.read().text(file);
+
+            //QUESTION 6
+
             i++;
         }
 
