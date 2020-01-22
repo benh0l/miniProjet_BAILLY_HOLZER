@@ -46,8 +46,8 @@ public class Main {
         //QUESTION 1
             //RECUPERER LES FICHIERS CF ou CP
         String path = Paths.get(Main.class.getResource("EVC-TXT/cf").getPath()).toString();
-        if(args.length == 2){
-            switch (args[1]){
+        if(args.length >= 1){
+            switch (args[0]){
                 case "CP":
                 case "cp":
                     path = Paths.get(Main.class.getResource("EVC-TXT/cp").getPath()).toString();
@@ -72,7 +72,6 @@ public class Main {
                         .trim()
                         .split("\\s+")).iterator())
                 .filter(s -> !(s.isEmpty()))
-                //.flatMap(s -> s.iterator())
                 .mapToPair(word -> new Tuple2<>(word, 1))
                 .reduceByKey((a, b) -> a + b);
             //Tri des mots par ordre décroissant des apparitions
@@ -104,11 +103,9 @@ public class Main {
 
         //PARTIE 2
         File[] files;
-        File f = new File("src/main/resources/EVC-TXT/cf");
+        File f = new File(path);
         files = f.listFiles();
         List<Row> listRow = new ArrayList();
-        int i = 0;
-        System.out.println(files.length);
         for(File file: files){
             //QUESTION 5
             JavaRDD<String> rdd = sc.textFile(file.getPath());
@@ -126,23 +123,36 @@ public class Main {
 
         Dataset<Row> itemsDF = spark.createDataFrame(listRow, schema);
 
+        double minSupp = 0.5;
+        double minConf = 0.5;
+
+        if(args.length >= 4){
+            minSupp = Double.parseDouble(args[2]);
+            minConf = Double.parseDouble(args[3]);
+        }
+
         FPGrowthModel model = new FPGrowth()
                 .setItemsCol("items")
                 //QUESTION 7
-                .setMinSupport(0.8) //JOUER AVEC VALEUR
+                .setMinSupport(minSupp) //JOUER AVEC VALEUR
                 //QUESTION 9
-                .setMinConfidence(0.6) //JOUER AVEC VALEUR
+                .setMinConfidence(minConf) //JOUER AVEC VALEUR
                 .fit(itemsDF);
 
+        int topk = 10;
+        if(args.length >= 2){
+            topk = Integer.parseInt(args[1]);
+        }
+
         // Display frequent itemsets. args[0] is top-k
-        model.freqItemsets().show(Integer.parseInt(args[0]),false);
+        model.freqItemsets().show(topk,false);
 
         // Display generated association rules.
-        model.associationRules().show(Integer.parseInt(args[0]), false);
+        model.associationRules().show(topk, false);
 
         // transform examines the input items against all the association rules and summarize the
         // consequents as prediction
-        model.transform(itemsDF).show(Integer.parseInt(args[0]), true);
+        model.transform(itemsDF).show(topk, false);
 
 
     }
