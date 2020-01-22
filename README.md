@@ -20,14 +20,14 @@ Exemple d'utilisation pour lancer le programme :
 java Main.class cf 7 0.3 0.8
 
 
-correspond à lancer la recherche sur le dossier CF avec les 7 meilleurs résultat, un minSupport de 0.3 et un minConfidence de 0.8 .
+Correspond à lancer la recherche sur le dossier CF avec les 7 meilleurs résultats, un minSupport de 0.3 et un minConfidence de 0.8 .
 
 ---
 ###Pour les questions 1 à 4 :
 
 Nous avons dans un premier temps récupéré les documents .txt et les avons stockés dans une JavaRDD.
 
-Ensuite nous avons modifié la casse afin de passer les caractères en minuscule afin de pouvoir compter ensemble les mots apparraissant avec une majuscule et sans (exemple : "Bonjour" et "bonjour").
+Ensuite nous avons modifié la casse afin de passer les caractères en minuscule afin de pouvoir compter ensemble les mots apparaissant avec une majuscule et sans (exemple : "Bonjour" et "bonjour").
 
 Puis nous avons remplacé (grâce à un replaceAll() ) les caractères qui n'entre pas dans la prise en compte du comptage de mots par des espaces, c'est à dire les apostrophes, les virgules, les points, les numéros, les slashs et autres caractères spéciaux afin d'ensuite faire un split() sur la chaine à chaque espace.
 
@@ -38,7 +38,7 @@ Ensuite, grâce à la méthode reduceByKey() nous avons réunis les tuples ayant
 
 ```java
 //QUESTION 2
-    //Compter les occurences des mots   
+    //Compter les occurrences des mots   
      JavaPairRDD<String, Integer> counts = lines
              //supprime les espaces du compte de mots
              .flatMap(s -> Arrays.asList(s.toLowerCase().replaceAll("[^A-Za-z\\-àâäéèêëïîôöùûüÿçæœ]+"," ")
@@ -81,7 +81,7 @@ File f = new File(path);
 files = f.listFiles();
 List<Row> listRow = new ArrayList();
 ```
-Ensuite nous avons crée une JavaRDD pour chaque fichier du dossier. Chaque RDD subit les mêmes transformations que pour les questions 1 à 4 du projet puis est ajoutée à notre List de Row appelée listRow.
+Ensuite nous avons créé une JavaRDD pour chaque fichier du dossier. Chaque RDD subit les mêmes transformations que pour les questions 1 à 4 du projet puis est ajoutée à notre List de Row appelée listRow.
 
 ```java
 for(File file: files){
@@ -95,7 +95,7 @@ for(File file: files){
     listRow.add(RowFactory.create(rdd.distinct().take((int)rdd.distinct().count())));
 }
 ```
-Il a fallu ensuite créer notre DataFrame et pour cela nous avons d'abord initialiser un objet StructType, schema. Notre Dataset est ensuite crée avec les valeurs de notre listRow.
+Il a fallu ensuite créer notre DataFrame et pour cela nous avons d'abord initialiser un objet StructType, schema. Notre Dataset est ensuite créé avec les valeurs de notre listRow.
 
 ```java
 StructType schema = new StructType(new StructField[]{ new StructField(
@@ -129,7 +129,7 @@ FPGrowthModel model = new FPGrowth()
         .setMinConfidence(minConf) //JOUER AVEC VALEUR
         .fit(itemsDF);
 ```
-Les lignes suivantes permettent l'affichage des données récoltées par le modèle. Les arguments de la méthode show() correspondent au nombre de résultat que l'on souhaite affiché, laissez ici libre de choix à l'utilisateur, et si l'on souhaite affiché les lignes en entier il faut indiquer false en 2e argument.
+Les lignes suivantes permettent l'affichage des données récoltées par le modèle. Les arguments de la méthode show() correspondent au nombre de résultat que l'on souhaite afficher, laissez ici libre de choix à l'utilisateur. Si l'on souhaite afficher les lignes en entier il faut indiquer false en 2e argument.
 args[0] correspond au choix de l'utilisateur pour choisir le top-k qu'il souhaite afficher, k étant un entier supérieur à 0.
 
 ```java
